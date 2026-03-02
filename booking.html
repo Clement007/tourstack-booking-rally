@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hotel Booking</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold: #c9a84c;
+      --gold-light: #e8c97a;
+      --dark: #0e0e0e;
+      --dark2: #1a1a1a;
+      --dark3: #252525;
+      --card: #1e1c1a;
+      --text: #f0ece4;
+      --muted: #888;
+      --border: rgba(201,168,76,0.25);
+    }
+
+    body {
+      background: var(--dark);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 16px 60px;
+      background-image: radial-gradient(ellipse at 20% 20%, rgba(201,168,76,0.06) 0%, transparent 60%),
+                        radial-gradient(ellipse at 80% 80%, rgba(201,168,76,0.04) 0%, transparent 50%);
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+      animation: fadeDown 0.7s ease both;
+    }
+
+    header .badge {
+      display: inline-block;
+      font-size: 11px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--gold);
+      border: 1px solid var(--border);
+      padding: 5px 16px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+
+    header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      color: var(--text);
+      line-height: 1.1;
+    }
+
+    header h1 span { color: var(--gold); }
+
+    header p {
+      margin-top: 10px;
+      font-size: 14px;
+      color: var(--muted);
+      letter-spacing: 0.5px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 560px;
+      animation: fadeUp 0.7s ease 0.15s both;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 36px 32px;
+      margin-bottom: 24px;
+    }
+
+    .card-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      color: var(--gold);
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-title svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+    .field { margin-bottom: 20px; }
+
+    label {
+      display: block;
+      font-size: 12px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="tel"],
+    select {
+      width: 100%;
+      background: var(--dark3);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 15px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(201,168,76,0.12);
+    }
+
+    select option { background: var(--dark3); }
+
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+    /* Live price display */
+    .price-display {
+      background: linear-gradient(135deg, rgba(201,168,76,0.12), rgba(201,168,76,0.04));
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      margin: 8px 0 24px;
+      display: none;
+    }
+
+    .price-display.visible { display: block; animation: pop 0.3s ease; }
+
+    .price-display .label-sm {
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .price-display .amount {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.4rem;
+      color: var(--gold);
+      letter-spacing: -1px;
+    }
+
+    .price-display .amount span { font-size: 1.2rem; }
+
+    .price-display .note {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* Amenities checkboxes */
+    .amenities { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    .amenity-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--dark3);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 10px;
+      padding: 11px 14px;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      font-size: 13px;
+      color: var(--text);
+      user-select: none;
+    }
+
+    .amenity-item:hover { border-color: var(--border); }
+    .amenity-item input { display: none; }
+
+    .amenity-item .check-box {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 5px;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .amenity-item input:checked ~ .check-box {
+      background: var(--gold);
+      border-color: var(--gold);
+    }
+
+    .amenity-item input:checked ~ .check-box::after {
+      content: '';
+      width: 5px; height: 9px;
+      border: 2px solid #000;
+      border-top: none; border-left: none;
+      transform: rotate(45deg) translate(-1px,-1px);
+      display: block;
+    }
+
+    /* Submit button */
+    .btn-submit {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-light));
+      color: #000;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 15px;
+      letter-spacing: 1px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+      text-transform: uppercase;
+    }
+
+    .btn-submit:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-submit:active { transform: translateY(0); }
+
+    /* Report */
+    #report {
+      display: none;
+      background: var(--card);
+      border: 1px solid var(--gold);
+      border-radius: 16px;
+      padding: 32px;
+      animation: fadeUp 0.5s ease both;
+    }
+
+    #report.visible { display: block; }
+
+    .report-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .report-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      color: var(--text);
+    }
+
+    .report-header .ref {
+      font-size: 11px;
+      color: var(--muted);
+      text-align: right;
+    }
+
+    .report-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      font-size: 14px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .report-row:last-child { border-bottom: none; }
+
+    .report-row .rkey { color: var(--muted); }
+    .report-row .rval { color: var(--text); font-weight: 500; }
+    .report-row .rval.gold { color: var(--gold); font-family: 'Playfair Display', serif; font-size: 1rem; }
+
+    .amenities-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .tag {
+      background: rgba(201,168,76,0.12);
+      color: var(--gold);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 11px;
+      padding: 3px 10px;
+      letter-spacing: 0.5px;
+    }
+
+    .total-box {
+      margin-top: 20px;
+      background: linear-gradient(135deg, rgba(201,168,76,0.12), rgba(201,168,76,0.04));
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .total-box .t-label {
+      font-size: 12px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .total-box .t-amount {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      color: var(--gold);
+    }
+
+    @keyframes fadeDown { from { opacity:0; transform: translateY(-20px); } to { opacity:1; transform: translateY(0); } }
+    @keyframes fadeUp { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0); } }
+    @keyframes pop { 0% { transform: scale(0.95); opacity:0; } 100% { transform: scale(1); opacity:1; } }
+
+    @media (max-width: 480px) {
+      .card { padding: 24px 18px; }
+      .row { grid-template-columns: 1fr; }
+      .amenities { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="badge">★ Luxury Hotel Booking</div>
+  <h1>Reserve Your <span>Stay</span></h1>
+  <p>Fill in your details — cost is calculated instantly.</p>
+</header>
+
+<div class="container">
+
+  <!-- FORM CARD -->
+  <div class="card">
+    <div class="card-title">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Guest Information
+    </div>
+
+    <form id="bookingForm" novalidate>
+
+      <div class="field">
+        <label for="guestname">Full Name</label>
+        <input type="text" id="guestname" name="guestname" placeholder="e.g. Jean Baptiste" required/>
+      </div>
+
+      <div class="field">
+        <label for="phone">Phone Number</label>
+        <input type="tel" id="phone" name="phone" placeholder="e.g. +250 780 000 000" required/>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="roomtype">Room Type</label>
+          <select id="roomtype" name="roomtype" required>
+            <option value="">-- Select --</option>
+            <option value="Standard|50">Standard — $50/night</option>
+            <option value="Deluxe|90">Deluxe — $90/night</option>
+            <option value="Suite|150">Suite — $150/night</option>
+            <option value="Presidential|300">Presidential — $300/night</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="night">Number of Nights</label>
+          <input type="number" id="night" name="night" min="1" placeholder="e.g. 3" required/>
+        </div>
+      </div>
+
+      <!-- LIVE PRICE DISPLAY -->
+      <div class="price-display" id="priceDisplay">
+        <div class="label-sm">Estimated Room Cost</div>
+        <div class="amount"><span>$</span><span id="liveAmount">0</span></div>
+        <div class="note" id="liveNote">—</div>
+      </div>
+
+      <!-- AMENITIES -->
+      <div class="field">
+        <label>Add-on Amenities</label>
+        <div class="amenities">
+          <label class="amenity-item">
+            <input type="checkbox" name="amenity" value="Breakfast|15"> 
+            <span class="check-box"></span> 🍳 Breakfast ($15/night)
+          </label>
+          <label class="amenity-item">
+            <input type="checkbox" name="amenity" value="Airport Pickup|30"> 
+            <span class="check-box"></span> 🚖 Airport Pickup ($30)
+          </label>
+          <label class="amenity-item">
+            <input type="checkbox" name="amenity" value="Gym Access|20"> 
+            <span class="check-box"></span> 🏋️ Gym Access ($20)
+          </label>
+          <label class="amenity-item">
+            <input type="checkbox" name="amenity" value="Spa Session|50"> 
+            <span class="check-box"></span> 🧖 Spa Session ($50)
+          </label>
+          <label class="amenity-item">
+            <input type="checkbox" name="amenity" value="City Tour|40"> 
+            <span class="check-box"></span> 🗺️ City Tour ($40)
+          </label>
+          <label class="amenity-item">
+            <input type="checkbox" name="amenity" value="Laundry|10"> 
+            <span class="check-box"></span> 👕 Laundry ($10/night)
+          </label>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit">Generate Booking Report →</button>
+    </form>
+  </div>
+
+  <!-- REPORT CARD -->
+  <div id="report">
+    <div class="report-header">
+      <div>
+        <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:6px;">Booking Summary</div>
+        <h2>Your Reservation</h2>
+      </div>
+      <div class="ref">
+        <div style="font-size:16px;color:var(--gold);font-family:'Playfair Display',serif;" id="rRefNo">—</div>
+        <div>Ref No.</div>
+      </div>
+    </div>
+
+    <div class="report-row"><span class="rkey">Guest Name</span><span class="rval" id="rName">—</span></div>
+    <div class="report-row"><span class="rkey">Phone</span><span class="rval" id="rPhone">—</span></div>
+    <div class="report-row"><span class="rkey">Room Type</span><span class="rval" id="rRoom">—</span></div>
+    <div class="report-row"><span class="rkey">Price Per Night</span><span class="rval" id="rPPN">—</span></div>
+    <div class="report-row"><span class="rkey">Number of Nights</span><span class="rval" id="rNights">—</span></div>
+    <div class="report-row"><span class="rkey">Room Subtotal</span><span class="rval" id="rRoomSub">—</span></div>
+    <div class="report-row" id="rAmenRow">
+      <span class="rkey">Amenities Included</span>
+      <div>
+        <div class="amenities-list" id="rAmenities"></div>
+      </div>
+    </div>
+    <div class="report-row"><span class="rkey">Amenities Cost</span><span class="rval" id="rAmenCost">—</span></div>
+    <div class="report-row"><span class="rkey">Tax (10%)</span><span class="rval" id="rTax">—</span></div>
+
+    <div class="total-box">
+      <div>
+        <div class="t-label">Grand Total</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:3px;">All taxes & fees included</div>
+      </div>
+      <div class="t-amount" id="rTotal">$0</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const nightInput  = document.getElementById('night');
+  const roomSelect  = document.getElementById('roomtype');
+  const priceDisplay= document.getElementById('priceDisplay');
+  const liveAmount  = document.getElementById('liveAmount');
+  const liveNote    = document.getElementById('liveNote');
+
+  // Per-night amenities
+  const perNightAmenities = ['Breakfast', 'Laundry'];
+
+  function getRoomData() {
+    const val = roomSelect.value;
+    if (!val) return null;
+    const [name, price] = val.split('|');
+    return { name, price: parseFloat(price) };
+  }
+
+  function getNights() {
+    const n = parseFloat(nightInput.value);
+    return isNaN(n) || n < 1 ? 0 : n;
+  }
+
+  function calcAmenityCost(nights) {
+    let cost = 0;
+    document.querySelectorAll('input[name="amenity"]:checked').forEach(cb => {
+      const [name, price] = cb.value.split('|');
+      cost += perNightAmenities.includes(name) ? parseFloat(price) * nights : parseFloat(price);
+    });
+    return cost;
+  }
+
+  function updateLivePrice() {
+    const room = getRoomData();
+    const nights = getNights();
+    if (room && nights > 0) {
+      const roomCost = room.price * nights;
+      const amenCost = calcAmenityCost(nights);
+      const subtotal = roomCost + amenCost;
+      const tax = subtotal * 0.1;
+      const total = subtotal + tax;
+      liveAmount.textContent = total.toFixed(2);
+      liveNote.textContent = `${room.name} × ${nights} night${nights>1?'s':''} + amenities + 10% tax`;
+      priceDisplay.classList.add('visible');
+    } else {
+      priceDisplay.classList.remove('visible');
+    }
+  }
+
+  nightInput.addEventListener('input', updateLivePrice);
+  roomSelect.addEventListener('change', updateLivePrice);
+  document.querySelectorAll('input[name="amenity"]').forEach(cb => cb.addEventListener('change', updateLivePrice));
+
+  // Form submit → generate report
+  document.getElementById('bookingForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const name  = document.getElementById('guestname').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const room  = getRoomData();
+    const nights = getNights();
+
+    if (!name || !phone || !room || nights < 1) {
+      alert('Please fill in all required fields.');
+      return;
+    }
+
+    const roomCost  = room.price * nights;
+    const amenities = [];
+    let amenCost = 0;
+
+    document.querySelectorAll('input[name="amenity"]:checked').forEach(cb => {
+      const [aName, aPrice] = cb.value.split('|');
+      const cost = perNightAmenities.includes(aName) ? parseFloat(aPrice) * nights : parseFloat(aPrice);
+      amenities.push({ name: aName, cost });
+      amenCost += cost;
+    });
+
+    const subtotal = roomCost + amenCost;
+    const tax      = subtotal * 0.1;
+    const total    = subtotal + tax;
+    const refNo    = 'HB-' + Date.now().toString(36).toUpperCase();
+
+    // Fill report
+    document.getElementById('rRefNo').textContent    = refNo;
+    document.getElementById('rName').textContent     = name;
+    document.getElementById('rPhone').textContent    = phone;
+    document.getElementById('rRoom').textContent     = room.name;
+    document.getElementById('rPPN').textContent      = `$${room.price.toFixed(2)}`;
+    document.getElementById('rNights').textContent   = `${nights} night${nights>1?'s':''}`;
+    document.getElementById('rRoomSub').textContent  = `$${roomCost.toFixed(2)}`;
+    document.getElementById('rAmenCost').textContent = `$${amenCost.toFixed(2)}`;
+    document.getElementById('rTax').textContent      = `$${tax.toFixed(2)}`;
+    document.getElementById('rTotal').textContent    = `$${total.toFixed(2)}`;
+
+    const amenDiv = document.getElementById('rAmenities');
+    amenDiv.innerHTML = '';
+    if (amenities.length === 0) {
+      amenDiv.innerHTML = '<span style="color:var(--muted);font-size:13px;">None selected</span>';
+    } else {
+      amenities.forEach(a => {
+        const tag = document.createElement('span');
+        tag.className = 'tag';
+        tag.textContent = `${a.name} ($${a.cost.toFixed(2)})`;
+        amenDiv.appendChild(tag);
+      });
+    }
+
+    const report = document.getElementById('report');
+    report.classList.add('visible');
+    setTimeout(() => report.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+  });
+</script>
+</body>
+</html>
