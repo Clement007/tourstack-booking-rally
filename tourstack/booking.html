@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TourStack – Book a Stay</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Nunito:wght@300;400;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --pink:  #c2185b; --rose: #b76e79; --blush: #fff0f6;
+      --dark:  #3d0026; --gray: #6b7280; --white: #ffffff;
+      --red:   #e74c3c; --radius:12px; --shadow:0 4px 24px rgba(0,0,0,0.10);
+      --transition:0.3s ease;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Nunito',sans-serif; background:var(--blush); color:var(--dark); }
+    h1,h2,h3 { font-family:'Cormorant Garamond',serif; }
+
+    nav { background:var(--pink); padding:0 24px; display:flex; align-items:center; justify-content:space-between; height:64px; position:sticky; top:0; z-index:100; box-shadow:0 2px 12px rgba(0,0,0,0.2); }
+    .nav-logo { font-family:'Cormorant Garamond',serif; font-size:1.5rem; color:var(--white); font-weight:700; }
+    .nav-links { display:flex; gap:8px; }
+    .nav-links a { color:var(--white); padding:8px 18px; border-radius:50px; font-weight:700; font-size:0.95rem; transition:background var(--transition); text-decoration:none; }
+    .nav-links a:hover,.nav-links a.active { background:rgba(255,255,255,0.25); }
+    .hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; padding:6px; }
+    .hamburger span { width:26px; height:3px; background:var(--white); border-radius:3px; }
+    .mobile-menu { display:none; flex-direction:column; background:var(--pink); padding:16px 24px; gap:4px; }
+    .mobile-menu a { color:var(--white); padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.2); font-weight:700; text-decoration:none; }
+
+    .page-header { background:linear-gradient(135deg, var(--pink), var(--dark)); color:var(--white); padding:56px 24px; text-align:center; }
+    .page-header h1 { font-size:clamp(2rem,5vw,3rem); margin-bottom:12px; }
+    .page-header p  { color:rgba(255,255,255,0.8); font-size:1.05rem; }
+
+    .form-container { max-width:760px; margin:48px auto 64px; padding:0 20px; }
+    .form-card { background:var(--white); border-radius:var(--radius); padding:40px 36px; box-shadow:var(--shadow); }
+
+    .form-group { margin-bottom:22px; }
+    label { display:block; font-weight:700; margin-bottom:8px; font-size:0.95rem; }
+    .hint { font-weight:400; color:var(--gray); font-size:0.82rem; margin-left:6px; }
+
+    input, select, textarea {
+      width:100%; padding:13px 16px; border:2px solid #e5e7eb; border-radius:8px;
+      font-family:'Nunito',sans-serif; font-size:1rem; color:var(--dark);
+      background:#fafafa; transition:border-color var(--transition); appearance:none;
+    }
+    input:focus, select:focus, textarea:focus { outline:none; border-color:var(--pink); background:var(--white); }
+
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+
+    /* Cost summary box */
+    .cost-summary {
+      background:linear-gradient(135deg,#fff0f6,#fce4ec);
+      border:2px solid var(--pink); border-radius:var(--radius);
+      padding:24px; margin:28px 0; display:none;
+    }
+    .cost-summary h3 { font-family:'Nunito',sans-serif; font-size:1rem; color:var(--pink); font-weight:700; text-transform:uppercase; letter-spacing:1px; margin-bottom:16px; }
+    .cost-row { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px dashed #f8bbd0; font-size:0.95rem; }
+    .cost-row:last-child { border-bottom:none; }
+    .cost-total { font-weight:700; font-size:1.2rem; color:var(--pink); }
+
+    .error-msg { color:var(--red); font-size:0.82rem; margin-top:4px; display:none; }
+
+    /* Alert box for server responses */
+    .alert { padding:16px 20px; border-radius:var(--radius); margin-bottom:20px; display:none; font-weight:700; }
+    .alert-success { background:#fce4ec; border:2px solid var(--pink); color:var(--dark); }
+    .alert-error   { background:#fee2e2; border:2px solid var(--red); color:#991b1b; }
+
+    .success-box { background:#fce4ec; border:2px solid var(--pink); border-radius:var(--radius); padding:28px; text-align:center; display:none; }
+    .success-box .icon { font-size:3rem; margin-bottom:12px; }
+    .success-box h3 { color:var(--dark); margin-bottom:8px; }
+    .success-box p  { color:var(--dark); font-size:0.95rem; }
+
+    .submit-btn {
+      width:100%; padding:16px; background:var(--pink); color:var(--white);
+      border:none; border-radius:50px; font-size:1.05rem; font-weight:700;
+      cursor:pointer; transition:background var(--transition),transform var(--transition);
+      display:flex; align-items:center; justify-content:center; gap:10px;
+    }
+    .submit-btn:hover { background:var(--dark); transform:translateY(-2px); }
+    .submit-btn:disabled { background:var(--gray); cursor:not-allowed; transform:none; }
+
+    footer { background:var(--dark); color:rgba(255,255,255,0.7); text-align:center; padding:32px 24px; font-size:0.9rem; }
+    footer strong { color:#fce4ec; }
+
+    @media (max-width:640px) {
+      .hamburger { display:flex; }
+      .nav-links  { display:none; }
+      .form-row   { grid-template-columns:1fr; }
+      .form-card  { padding:28px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-logo">TourStack</div>
+    <div class="nav-links">
+      <a href="index.html">🏠 Home</a>
+      <a href="booking.html" class="active">📅 Book Now</a>
+      <a href="dashboard.html">📊 Owner</a>
+    </div>
+    <div class="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></div>
+  </nav>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html">🏠 Home</a>
+    <a href="booking.html">📅 Book Now</a>
+    <a href="dashboard.html">📊 Owner Dashboard</a>
+  </div>
+
+  <div class="page-header">
+    <h1>📅 Book a Home Stay</h1>
+    <p>Fill in the form below. Your total cost is calculated automatically.</p>
+  </div>
+
+  <div class="form-container">
+    <div class="form-card">
+
+      <!-- Server response messages -->
+      <div class="alert alert-success" id="alertSuccess"></div>
+      <div class="alert alert-error"   id="alertError"></div>
+
+      <!-- Success state (shown after submit) -->
+      <div class="success-box" id="successBox">
+        <div class="icon">🎉</div>
+        <h3>Booking Submitted!</h3>
+        <p>Your request is <strong>pending confirmation</strong> by the owner.</p>
+        <p style="margin-top:8px;">Check the <a href="dashboard.html" style="color:var(--pink);font-weight:700;">Owner Dashboard</a> to see its status.</p>
+        <button onclick="resetForm()" style="margin-top:20px; background:var(--pink); color:var(--white); border:none; padding:12px 28px; border-radius:50px; font-weight:700; cursor:pointer;">Make Another Booking</button>
+      </div>
+
+      <!-- THE FORM -->
+      <div id="bookingForm">
+        <h2 style="margin-bottom:8px;">Guest Information</h2>
+        <p style="color:var(--gray); margin-bottom:28px; font-size:0.95rem;">Fields marked * are required</p>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Guest Name *</label>
+            <input type="text" id="guestName" placeholder="e.g. Amina Uwase" />
+            <div class="error-msg" id="nameError">Please enter your name.</div>
+          </div>
+          <div class="form-group">
+            <label>Phone Number *<span class="hint">For confirmation</span></label>
+            <input type="tel" id="guestPhone" placeholder="e.g. 078 123 4567" />
+            <div class="error-msg" id="phoneError">Please enter a valid phone number.</div>
+          </div>
+        </div>
+
+        <!-- Property select — populated from MySQL via PHP -->
+        <div class="form-group">
+          <label>Select Property *</label>
+          <select id="property" onchange="onPropertyChange()">
+            <option value="">-- Loading properties... --</option>
+          </select>
+          <div class="error-msg" id="propertyError">Please select a property.</div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Check-in Date *</label>
+            <input type="date" id="checkIn" onchange="calculateNights()" />
+            <div class="error-msg" id="checkInError">Please select a check-in date.</div>
+          </div>
+          <div class="form-group">
+            <label>Check-out Date *</label>
+            <input type="date" id="checkOut" onchange="calculateNights()" />
+            <div class="error-msg" id="checkOutError">Please select a check-out date.</div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Number of Nights *<span class="hint">Auto-filled</span></label>
+            <input type="number" id="nights" placeholder="e.g. 3" min="1" oninput="calculateCost()" />
+            <div class="error-msg" id="nightsError">At least 1 night required.</div>
+          </div>
+          <div class="form-group">
+            <label>Price per Night (RWF) *</label>
+            <input type="number" id="pricePerNight" placeholder="e.g. 12000" min="0" oninput="calculateCost()" />
+            <div class="error-msg" id="priceError">Please enter the price.</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Special Requests <span class="hint">(optional)</span></label>
+          <textarea id="specialRequests" rows="3" placeholder="Any special needs or requests..."></textarea>
+        </div>
+
+        <!-- Auto-calculated cost summary -->
+        <div class="cost-summary" id="costSummary">
+          <h3>💰 Estimated Cost Summary</h3>
+          <div class="cost-row"><span>Nights</span><span id="summaryNights">—</span></div>
+          <div class="cost-row"><span>Price per Night</span><span id="summaryPrice">—</span></div>
+          <div class="cost-row"><span>Service Fee (5%)</span><span id="summaryFee">—</span></div>
+          <div class="cost-row cost-total"><span>TOTAL</span><span id="summaryTotal">—</span></div>
+        </div>
+
+        <button class="submit-btn" id="submitBtn" onclick="submitBooking()">
+          📤 Submit Booking Request
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p><strong>TourStack</strong> — Connecting Tourists & Local Home Stays in Rwanda</p>
+    <p style="margin-top:8px;">© 2026 TourStack. Groupe 1 || project C .</p>
+  </footer>
+
+  <script>
+    // ---------------------------------------------------------------
+    // GLOBAL: stores properties loaded from PHP
+    // ---------------------------------------------------------------
+    let properties = [];
+
+    // ---------------------------------------------------------------
+    // LOAD PROPERTIES FROM PHP/MYSQL into the dropdown
+    // Called when page loads.
+    // ---------------------------------------------------------------
+    async function loadProperties() {
+      const select = document.getElementById('property');
+
+      try {
+        const res  = await fetch('get_properties.php');
+        properties = await res.json();
+
+        // Clear loading option
+        select.innerHTML = '<option value="">-- Choose a property --</option>';
+
+        // Add one <option> for each property from the database
+        properties.forEach(function(p) {
+          select.innerHTML += `<option value="${p.id}">${p.name} – RWF ${parseInt(p.price_night).toLocaleString('en-RW')}/night</option>`;
+        });
+
+        // If a property_id was passed in the URL (from Home page "Book Now"),
+        // pre-select it automatically
+        const urlParams     = new URLSearchParams(window.location.search);
+        const preSelectId   = urlParams.get('property_id');
+        if (preSelectId) {
+          select.value = preSelectId;
+          onPropertyChange();
+        }
+
+      } catch (err) {
+        // Fallback: let user type manually if PHP is not running
+        select.innerHTML = `
+          <option value="">-- Server unavailable, enter price manually --</option>
+          <option value="manual">Custom / Other</option>`;
+        console.error('Could not load properties:', err);
+      }
+    }
+
+    // ---------------------------------------------------------------
+    // When a property is selected, auto-fill the price per night
+    // ---------------------------------------------------------------
+    function onPropertyChange() {
+      const selectedId = parseInt(document.getElementById('property').value);
+
+      // Find the matching property in our loaded array
+      const prop = properties.find(p => p.id === selectedId);
+
+      if (prop) {
+        document.getElementById('pricePerNight').value = prop.price_night;
+        calculateCost();
+      }
+    }
+
+    // ---------------------------------------------------------------
+    // Calculate nights from check-in / check-out dates
+    // ---------------------------------------------------------------
+    function calculateNights() {
+      const ci = document.getElementById('checkIn').value;
+      const co = document.getElementById('checkOut').value;
+      if (!ci || !co) return;
+
+      const diff = (new Date(co) - new Date(ci)) / (1000 * 60 * 60 * 24);
+      if (diff > 0) {
+        document.getElementById('nights').value = diff;
+        calculateCost();
+      } else {
+        document.getElementById('nights').value = '';
+        alert('⚠️ Check-out must be after check-in.');
+      }
+    }
+
+    // ---------------------------------------------------------------
+    // Live cost calculation — updates summary box as user types
+    // ---------------------------------------------------------------
+    function calculateCost() {
+      const nights = parseFloat(document.getElementById('nights').value);
+      const price  = parseFloat(document.getElementById('pricePerNight').value);
+      const box    = document.getElementById('costSummary');
+
+      if (nights > 0 && price > 0) {
+        const fee   = nights * price * 0.05;
+        const total = nights * price + fee;
+        const fmt   = n => parseInt(n).toLocaleString('en-RW') + ' RWF';
+
+        document.getElementById('summaryNights').textContent = nights + ' night(s)';
+        document.getElementById('summaryPrice').textContent  = fmt(price);
+        document.getElementById('summaryFee').textContent    = fmt(fee);
+        document.getElementById('summaryTotal').textContent  = fmt(total);
+        box.style.display = 'block';
+      } else {
+        box.style.display = 'none';
+      }
+    }
+
+    // ---------------------------------------------------------------
+    // Form validation — checks all required fields
+    // Returns true = all good, false = has errors
+    // ---------------------------------------------------------------
+    function validateForm() {
+      let valid = true;
+
+      function check(fieldId, errorId, condition) {
+        const err = document.getElementById(errorId);
+        if (condition) { err.style.display = 'block'; valid = false; }
+        else           { err.style.display = 'none'; }
+      }
+
+      check('guestName',     'nameError',     !document.getElementById('guestName').value.trim());
+      check('guestPhone',    'phoneError',    document.getElementById('guestPhone').value.trim().length < 9);
+      check('property',      'propertyError', !document.getElementById('property').value);
+      check('checkIn',       'checkInError',  !document.getElementById('checkIn').value);
+      check('checkOut',      'checkOutError', !document.getElementById('checkOut').value);
+      check('nights',        'nightsError',   !(document.getElementById('nights').value >= 1));
+      check('pricePerNight', 'priceError',    !(document.getElementById('pricePerNight').value > 0));
+
+      return valid;
+    }
+
+    // ---------------------------------------------------------------
+    // SUBMIT BOOKING — sends data to submit_booking.php via POST
+    //
+    // fetch() with method:'POST' sends the booking to PHP.
+    // PHP validates it again on the server and saves to MySQL.
+    // ---------------------------------------------------------------
+    async function submitBooking() {
+      if (!validateForm()) return;
+
+      const btn = document.getElementById('submitBtn');
+      const selectedId   = parseInt(document.getElementById('property').value);
+      const selectedProp = properties.find(p => p.id === selectedId);
+      const nights       = parseFloat(document.getElementById('nights').value);
+      const price        = parseFloat(document.getElementById('pricePerNight').value);
+
+      // Build the booking object to send to PHP
+      const booking = {
+        guest_name:       document.getElementById('guestName').value.trim(),
+        guest_phone:      document.getElementById('guestPhone').value.trim(),
+        special_requests: document.getElementById('specialRequests').value.trim(),
+        property_id:      selectedId,
+        property_name:    selectedProp ? selectedProp.name : 'Unknown',
+        check_in:         document.getElementById('checkIn').value,
+        check_out:        document.getElementById('checkOut').value,
+        nights:           nights,
+        price_per_night:  price
+      };
+
+      // Disable button and show loading state
+      btn.disabled = true;
+      btn.textContent = '⏳ Submitting...';
+
+      try {
+        // POST the booking as JSON to submit_booking.php
+        const response = await fetch('submit_booking.php', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify(booking)
+        });
+
+        // Parse PHP's JSON response
+        const result = await response.json();
+
+        if (result.success) {
+          // SHOW SUCCESS STATE
+          document.getElementById('bookingForm').style.display = 'none';
+          document.getElementById('successBox').style.display  = 'block';
+          document.getElementById('successBox').scrollIntoView({ behavior: 'smooth' });
+        } else {
+          // Show server-side error message
+          const alertEl = document.getElementById('alertError');
+          alertEl.textContent = '❌ ' + result.message;
+          alertEl.style.display = 'block';
+          alertEl.scrollIntoView({ behavior: 'smooth' });
+        }
+
+      } catch (err) {
+        // Network or PHP server error
+        const alertEl = document.getElementById('alertError');
+        alertEl.textContent = '❌ Could not connect to server. Make sure PHP is running.';
+        alertEl.style.display = 'block';
+        console.error('Submit error:', err);
+      } finally {
+        // Re-enable the button no matter what
+        btn.disabled = false;
+        btn.textContent = '📤 Submit Booking Request';
+      }
+    }
+
+    // ---------------------------------------------------------------
+    // Reset form so user can make another booking
+    // ---------------------------------------------------------------
+    function resetForm() {
+      document.getElementById('bookingForm').style.display = 'block';
+      document.getElementById('successBox').style.display  = 'none';
+      document.getElementById('alertError').style.display  = 'none';
+      document.getElementById('alertSuccess').style.display= 'none';
+      document.querySelector('#bookingForm form') && document.querySelector('#bookingForm form').reset();
+      document.getElementById('costSummary').style.display = 'none';
+      // Reset all inputs manually
+      ['guestName','guestPhone','checkIn','checkOut','nights','pricePerNight','specialRequests'].forEach(id => {
+        document.getElementById(id).value = '';
+      });
+      document.getElementById('property').value = '';
+    }
+
+    function toggleMenu() {
+      const m = document.getElementById('mobileMenu');
+      m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    // Set minimum date to today
+    window.addEventListener('load', function() {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('checkIn').setAttribute('min', today);
+      document.getElementById('checkOut').setAttribute('min', today);
+      loadProperties(); // load properties from database
+    });
+  </script>
+</body>
+</html>

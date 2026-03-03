@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TourStack – Home Stay Booking</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Nunito:wght@300;400;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --pink:    #c2185b;
+      --rose:    #b76e79;
+      --blush:   #fff0f6;
+      --dark:    #3d0026;
+      --gray:    #6b7280;
+      --white:   #ffffff;
+      --radius:  12px;
+      --shadow:  0 4px 24px rgba(0,0,0,0.10);
+      --transition: 0.3s ease;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Nunito',sans-serif; background:var(--blush); color:var(--dark); line-height:1.6; }
+    h1,h2,h3 { font-family:'Cormorant Garamond',serif; }
+    a { text-decoration:none; color:inherit; }
+
+    /* NAV */
+    nav {
+      background:var(--pink); padding:0 24px;
+      display:flex; align-items:center; justify-content:space-between;
+      height:64px; position:sticky; top:0; z-index:100;
+      box-shadow:0 2px 12px rgba(0,0,0,0.2);
+    }
+    .nav-logo { font-family:'Cormorant Garamond',serif; font-size:1.5rem; color:var(--white); font-weight:700; letter-spacing:1px; }
+    .nav-logo span { color:#fce4ec; }
+    .nav-links { display:flex; gap:8px; }
+    .nav-links a { color:var(--white); padding:8px 18px; border-radius:50px; font-weight:700; font-size:0.95rem; transition:background var(--transition); }
+    .nav-links a:hover, .nav-links a.active { background:rgba(255,255,255,0.25); }
+    .hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; padding:6px; }
+    .hamburger span { width:26px; height:3px; background:var(--white); border-radius:3px; }
+    .mobile-menu { display:none; flex-direction:column; background:var(--pink); padding:16px 24px; gap:4px; }
+    .mobile-menu a { color:var(--white); padding:12px 0; border-bottom:1px solid rgba(255,255,255,0.2); font-weight:700; }
+    .mobile-menu a:last-child { border-bottom:none; }
+
+    /* HERO */
+    .hero {
+      min-height:88vh;
+      background: linear-gradient(135deg, rgba(194,24,91,0.85), rgba(61,0,38,0.80)),
+        url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1400&q=80') center/cover no-repeat;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      text-align:center; padding:40px 24px;
+    }
+    .hero-badge { background:rgba(255,255,255,0.2); color:var(--white); border:1px solid rgba(255,255,255,0.4); font-size:0.78rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; padding:6px 18px; border-radius:50px; margin-bottom:24px; }
+    .hero h1 { font-size:clamp(2.4rem,6vw,4.5rem); color:var(--white); line-height:1.15; max-width:720px; margin-bottom:20px; }
+    .hero h1 span { color:#fce4ec; }
+    .hero p { color:rgba(255,255,255,0.85); font-size:1.1rem; max-width:520px; margin-bottom:36px; }
+    .hero-buttons { display:flex; gap:16px; flex-wrap:wrap; justify-content:center; }
+    .btn { padding:14px 32px; border-radius:50px; font-weight:700; font-size:1rem; cursor:pointer; border:none; transition:transform var(--transition),box-shadow var(--transition); display:inline-flex; align-items:center; gap:8px; }
+    .btn:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,0.2); }
+    .btn-primary { background:var(--white); color:var(--pink); }
+    .btn-outline { background:transparent; color:var(--white); border:2px solid var(--white); }
+
+    /* STATS */
+    .stats { background:var(--dark); display:flex; justify-content:center; flex-wrap:wrap; }
+    .stat-item { padding:28px 40px; text-align:center; border-right:1px solid rgba(255,255,255,0.08); }
+    .stat-item:last-child { border-right:none; }
+    .stat-item .number { font-family:'Cormorant Garamond',serif; font-size:2.2rem; color:#fce4ec; font-weight:700; }
+    .stat-item .label { color:rgba(255,255,255,0.6); font-size:0.85rem; margin-top:4px; }
+
+    /* SECTION */
+    .section { padding:80px 24px; max-width:1100px; margin:0 auto; }
+    .section-title { text-align:center; margin-bottom:12px; font-size:clamp(1.8rem,4vw,2.6rem); }
+    .section-subtitle { text-align:center; color:var(--gray); font-size:1.05rem; margin-bottom:56px; }
+
+    /* FEATURES */
+    .features-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:28px; }
+    .feature-card { background:var(--white); border-radius:var(--radius); padding:36px 28px; box-shadow:var(--shadow); transition:transform var(--transition); border-top:4px solid var(--pink); }
+    .feature-card:hover { transform:translateY(-6px); }
+    .feature-icon { font-size:2.4rem; margin-bottom:16px; }
+    .feature-card h3 { font-family:'Nunito',sans-serif; font-weight:700; font-size:1.1rem; margin-bottom:10px; color:var(--pink); }
+    .feature-card p { color:var(--gray); font-size:0.95rem; }
+
+    /* STAY CARDS — loaded from PHP */
+    .stays-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:28px; }
+    .stay-card { background:var(--white); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow); transition:transform var(--transition); }
+    .stay-card:hover { transform:translateY(-6px); }
+    .stay-img { width:100%; height:200px; object-fit:cover; }
+    .stay-body { padding:20px; }
+    .stay-body h3 { font-size:1.15rem; margin-bottom:6px; }
+    .stay-location { color:var(--gray); font-size:0.88rem; margin-bottom:12px; }
+    .stay-price { font-size:1.2rem; font-weight:700; color:var(--pink); }
+    .stay-price span { font-size:0.85rem; color:var(--gray); font-weight:400; }
+    .stay-actions { display:flex; justify-content:space-between; align-items:center; margin-top:16px; }
+    .btn-small { background:var(--pink); color:var(--white); padding:10px 22px; border-radius:50px; font-weight:700; font-size:0.9rem; cursor:pointer; border:none; transition:var(--transition); }
+    .btn-small:hover { background:var(--dark); }
+    .rating { color:var(--rose); font-size:0.9rem; }
+
+    /* Loading skeleton for property cards */
+    .skeleton { background:linear-gradient(90deg,#f0f0f0 25%,#e0e0e0 50%,#f0f0f0 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; border-radius:8px; }
+    @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+    .skeleton-card { background:var(--white); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow); }
+    .skeleton-img { width:100%; height:200px; }
+    .skeleton-line { height:16px; margin:8px 16px; border-radius:4px; }
+    .skeleton-line.short { width:60%; }
+
+    /* FOOTER */
+    footer { background:var(--dark); color:rgba(255,255,255,0.7); text-align:center; padding:32px 24px; font-size:0.9rem; }
+    footer strong { color:#fce4ec; }
+
+    @media (max-width:640px) {
+      .hamburger { display:flex; }
+      .nav-links  { display:none; }
+      .stat-item  { padding:20px 24px; border-right:none; border-bottom:1px solid rgba(255,255,255,0.08); width:50%; }
+      .section    { padding:56px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-logo">Tour<span>Stack</span></div>
+    <div class="nav-links">
+      <a href="index.html" class="active">🏠 Home</a>
+      <a href="booking.html">📅 Book Now</a>
+      <a href="dashboard.html">📊 Owner</a>
+    </div>
+    <div class="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></div>
+  </nav>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="index.html">🏠 Home</a>
+    <a href="booking.html">📅 Book Now</a>
+    <a href="dashboard.html">📊 Owner Dashboard</a>
+  </div>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-badge">🌍 Groupe 1 #1 Home Stay Platform</div>
+    <h1>Your Perfect <span>Home Stay</span> Awaits</h1>
+    <p>Simple, transparent bookings for local home-stay owners and tourists. No lost messages. No hidden costs.</p>
+    <div class="hero-buttons">
+      <a href="booking.html" class="btn btn-primary">📅 Book a Stay</a>
+      <a href="#stays" class="btn btn-outline">🔍 Browse Stays</a>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <div class="stats">
+    <div class="stat-item"><div class="number">120+</div><div class="label">Home Stays</div></div>
+    <div class="stat-item"><div class="number">800+</div><div class="label">Happy Tourists</div></div>
+    <div class="stat-item"><div class="number">15+</div><div class="label">Locations</div></div>
+    <div class="stat-item"><div class="number">4.8★</div><div class="label">Avg Rating</div></div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <section class="section">
+    <h2 class="section-title">How TourStack Works</h2>
+    <p class="section-subtitle">Booking a local home stay has never been this simple.</p>
+    <div class="features-grid">
+      <div class="feature-card"><div class="feature-icon">🔍</div><h3>1. Browse Stays</h3><p>Explore verified local home stays with clear photos, prices, and locations.</p></div>
+      <div class="feature-card"><div class="feature-icon">📝</div><h3>2. Fill a Request</h3><p>Enter your name, phone, nights, and the system auto-calculates the total cost.</p></div>
+      <div class="feature-card"><div class="feature-icon">✅</div><h3>3. Owner Confirms</h3><p>The home-stay owner reviews and confirms your booking from their dashboard.</p></div>
+      <div class="feature-card"><div class="feature-icon">🏡</div><h3>4. Enjoy Your Stay</h3><p>Arrive knowing everything is arranged. Full booking history kept safely.</p></div>
+    </div>
+  </section>
+
+  <!-- FEATURED STAYS — loaded dynamically from MySQL via PHP -->
+  <section style="background:#fce4ec; padding:80px 40px;" id="stays">
+    <div style="max-width:1100px; margin:0 auto;">
+      <h2 class="section-title">Featured Home Stays</h2>
+      <p class="section-subtitle">Properties loaded live from our database.</p>
+
+      <!-- This div is filled by JavaScript below -->
+      <div class="stays-grid" id="propertiesGrid">
+        <!-- Loading skeletons shown while fetching -->
+        <div class="skeleton-card"><div class="skeleton skeleton-img"></div><div class="skeleton skeleton-line" style="margin-top:16px;"></div><div class="skeleton skeleton-line short"></div></div>
+        <div class="skeleton-card"><div class="skeleton skeleton-img"></div><div class="skeleton skeleton-line" style="margin-top:16px;"></div><div class="skeleton skeleton-line short"></div></div>
+        <div class="skeleton-card"><div class="skeleton skeleton-img"></div><div class="skeleton skeleton-line" style="margin-top:16px;"></div><div class="skeleton skeleton-line short"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p><strong>TourStack</strong> — Connecting Tourists & Local Home Stays in Rwanda</p>
+    <p style="margin-top:8px;">© 2026 TourStack. Groupe 1 || project C .</p>
+  </footer>
+
+  <script>
+    // ---------------------------------------------------------------
+    // LOAD PROPERTIES FROM PHP/MYSQL
+    // fetch() sends an HTTP GET request to get_properties.php
+    // which queries MySQL and returns JSON.
+    // ---------------------------------------------------------------
+    async function loadProperties() {
+      const grid = document.getElementById('propertiesGrid');
+
+      try {
+        // Send GET request to our PHP file
+        const response = await fetch('get_properties.php');
+
+        // Check if request succeeded
+        if (!response.ok) throw new Error('Server error: ' + response.status);
+
+        // Parse the JSON response into a JavaScript array
+        const properties = await response.json();
+
+        if (properties.length === 0) {
+          grid.innerHTML = '<p style="color:var(--gray); text-align:center; grid-column:1/-1;">No properties found in database.</p>';
+          return;
+        }
+
+        // Build HTML cards for each property
+        grid.innerHTML = properties.map(function(p) {
+          return `
+            <div class="stay-card">
+              <img class="stay-img" src="${p.image_url || 'https://via.placeholder.com/600x200'}" alt="${p.name}" loading="lazy" />
+              <div class="stay-body">
+                <h3>${p.name}</h3>
+                <div class="stay-location">📍 ${p.location}</div>
+                <div class="stay-price">RWF ${parseInt(p.price_night).toLocaleString('en-RW')} <span>/ night</span></div>
+                <div class="stay-actions">
+                  <a href="booking.html?property_id=${p.id}" class="btn-small">Book Now</a>
+                  <div class="rating">★ ${p.rating}</div>
+                </div>
+              </div>
+            </div>`;
+        }).join('');
+
+      } catch (error) {
+        // If fetch fails (e.g. PHP not running), show fallback message
+        console.error('Failed to load properties:', error);
+        grid.innerHTML = `
+          <div style="grid-column:1/-1; text-align:center; color:var(--gray); padding:40px;">
+            <p>⚠️ Could not load properties from database.</p>
+            <p style="font-size:0.85rem; margin-top:8px;">Make sure your PHP server is running and database is set up.</p>
+          </div>`;
+      }
+    }
+
+    function toggleMenu() {
+      const m = document.getElementById('mobileMenu');
+      m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    // Load properties when page opens
+    window.addEventListener('load', loadProperties);
+  </script>
+</body>
+</html>
